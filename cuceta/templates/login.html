@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEEP Mapa - Acesso</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+
+  <div class="auth-card">
+    <div class="auth-header">
+      <i class="fa-solid fa-map-location-dot logo-icon"></i>
+      <h2>CEEP <strong>Mapa</strong></h2>
+      <p>Acesse para navegar pelo campus</p>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert-box">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="auth-tabs">
+      <button class="tab-btn active" id="btnTabLogin" onclick="mostrarForm('login')">Entrar</button>
+      <button class="tab-btn" id="btnTabRegister" onclick="mostrarForm('register')">Criar Conta</button>
+    </div>
+
+    <!-- FORMULÁRIO LOGIN -->
+    <form id="formLogin" class="auth-form" action="/login" method="POST">
+      <input type="hidden" name="action" value="login">
+      
+      <div class="input-group">
+        <i class="fa-solid fa-user input-icon"></i>
+        <input type="text" name="username" placeholder="Nome de usuário" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fa-solid fa-lock input-icon"></i>
+        <input type="password" name="senha" placeholder="Senha" required>
+      </div>
+
+      <button type="submit" class="submit-btn">Entrar</button>
+    </form>
+
+    <!-- FORMULÁRIO CADASTRO -->
+    <form id="formRegister" class="auth-form hidden" action="/login" method="POST">
+      <input type="hidden" name="action" value="register">
+
+      <div class="input-group">
+        <i class="fa-solid fa-user input-icon"></i>
+        <input type="text" name="username" placeholder="Nome de usuário" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fa-solid fa-envelope input-icon"></i>
+        <input type="email" name="email" placeholder="Seu E-mail" required>
+      </div>
+
+      <div class="input-group">
+        <i class="fa-solid fa-lock input-icon"></i>
+        <input type="password" name="senha" placeholder="Crie uma senha" required>
+      </div>
+
+      <button type="submit" class="submit-btn">Criar Conta e Receber E-mail</button>
+    </form>
+  </div>
+
+  <script>
+    function mostrarForm(aba) {
+      const formLogin = document.getElementById('formLogin');
+      const formRegister = document.getElementById('formRegister');
+      const btnTabLogin = document.getElementById('btnTabLogin');
+      const btnTabRegister = document.getElementById('btnTabRegister');
+
+      if (aba === 'login') {
+        formLogin.classList.remove('hidden');
+        formRegister.classList.add('hidden');
+        btnTabLogin.classList.add('active');
+        btnTabRegister.classList.remove('active');
+      } else {
+        formLogin.classList.add('hidden');
+        formRegister.classList.remove('hidden');
+        btnTabLogin.classList.remove('active');
+        btnTabRegister.classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>

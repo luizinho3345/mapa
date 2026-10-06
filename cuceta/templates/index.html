@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEEP Mapa</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- MÁSCARA ESCURA DA BARRA LATERAL -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- BARRA LATERAL -->
+  <aside class="sidebar collapsed" id="sidebar">
+    <div class="sidebar-header">
+      <div class="user-info">
+        <i class="fa-solid fa-circle-user avatar-icon"></i>
+        <div>
+          <span class="user-name" id="userDisplayName">{{ username }}</span>
+          <small id="userDisplayCGM" style="display:block; color:#64748b; font-size:11px;">CGM: {{ cgm }}</small>
+        </div>
+      </div>
+      <button class="close-sidebar-btn" id="closeSidebar" title="Fechar Menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="#" id="btnTrocarUsuario"><i class="fa-solid fa-arrows-rotate"></i> Trocar de Usuário</a></li>
+        <li><a href="#" id="btnAbrirMensagens"><i class="fa-solid fa-envelope"></i> Caixa de Mensagens</a></li>
+        <li><a href="#"><i class="fa-solid fa-language"></i> Idioma: PT-BR</a></li>
+        <li><a href="#"><i class="fa-solid fa-circle-info"></i> Sobre o Projeto</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="/logout" class="logout-btn">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Sair / Log out</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- MODAL DE MENSAGENS DO ALUNO -->
+  <div class="modal-overlay" id="mensagensModal">
+    <div class="modal-card">
+      <button class="close-modal-btn" id="closeMensagensModal" title="Fechar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div class="modal-body">
+        <h2 class="modal-title"><i class="fa-solid fa-envelope-open-text"></i> Caixa de Mensagens</h2>
+        <p class="modal-description">Avisos e documentos enviados pela Secretaria para o seu CGM.</p>
+        <div id="listaMensagensContainer" class="messages-list">
+          <p style="color: #94a3b8; font-size: 13px;">Carregando mensagens...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL / MENU DA SECRETARIA (EXPANDIDO) -->
+  <div class="modal-overlay" id="secretariaModal">
+    <div class="modal-card">
+      <button class="close-modal-btn" id="closeSecretariaModal" title="Fechar">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      
+      <!-- ESPAÇO PARA SLIDER / CARROSSEL DE FOTOS -->
+      <div class="carousel-container">
+        <div class="carousel-track" id="carouselTrack">
+          
+          <div class="carousel-slide active">
+            <div class="photo-placeholder">
+              <i class="fa-solid fa-camera"></i>
+              <span>Foto 1 da Secretaria (Em breve)</span>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="photo-placeholder">
+              <i class="fa-solid fa-camera"></i>
+              <span>Foto 2 da Secretaria (Atendimento)</span>
+            </div>
+          </div>
+
+          <div class="carousel-slide">
+            <div class="photo-placeholder">
+              <i class="fa-solid fa-camera"></i>
+              <span>Foto 3 da Secretaria (Fachada)</span>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="carousel-btn prev" id="prevSlide" title="Foto Anterior">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="carousel-btn next" id="nextSlide" title="Próxima Foto">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+
+        <div class="carousel-dots" id="carouselDots">
+          <span class="dot active" data-index="0"></span>
+          <span class="dot" data-index="1"></span>
+          <span class="dot" data-index="2"></span>
+        </div>
+      </div>
+
+      <!-- INFORMAÇÕES DA SECRETARIA -->
+      <div class="modal-body">
+        <h2 class="modal-title">Secretaria do CEEP</h2>
+        <p class="modal-description">
+          A secretaria do CEEP é o local onde estudantes, funcionários e demais envolvidos na comunidade escolar podem solicitar serviços como: protocolo de atestados, rematrícula, processamento de documentos, etc.<br><br>
+          Fica aberta durante os 3 períodos de aula, fechando entre eles e com abertura às 8h.
+        </p>
+
+        <!-- ACCORDION COM AS NOVAS FUNCIONALIDADES -->
+        <div class="services-accordion">
+          
+          <!-- 1. PROTOCOLAR ATESTADO -->
+          <div class="accordion-item">
+            <button class="accordion-header" data-target="panelAtestado">
+              <span><i class="fa-solid fa-file-arrow-up"></i> Protocolar Atestado</span>
+              <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+            </button>
+            <div class="accordion-panel" id="panelAtestado">
+              <div class="panel-content">
+                <p class="panel-instruction">Anexe o arquivo em formato PDF do seu atestado médico ou justificativa:</p>
+                <div class="file-upload-box">
+                  <input type="file" id="atestadoFile" accept=".pdf" class="file-input">
+                  <label for="atestadoFile" class="file-label">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span id="fileNameText">Clique aqui para selecionar o arquivo PDF</span>
+                  </label>
+                </div>
+                <div class="panel-action">
+                  <button class="btn-confirm" id="btnEnviarAtestado">Confirmar Envio</button>
+                </div>
+                <div class="status-msg success-msg hidden" id="msgAtestado">
+                  <i class="fa-solid fa-circle-check"></i> <span id="msgAtestadoTexto">Atestado encaminhado com sucesso para a Secretaria!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. VER SITUAÇÃO DE CONTRATO -->
+          <div class="accordion-item">
+            <button class="accordion-header" data-target="panelContrato">
+              <span><i class="fa-solid fa-file-contract"></i> Ver Situação de Contrato</span>
+              <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+            </button>
+            <div class="accordion-panel" id="panelContrato">
+              <div class="panel-content">
+                <div class="form-row">
+                  <input type="text" id="nomeContratoInput" value="{{ username }}" placeholder="Digite seu Nome Completo..." class="modal-input">
+                  <button class="btn-primary" id="btnBuscarContrato">Consultar</button>
+                </div>
+                
+                <!-- CARD COM OS DADOS RETORNADOS DO BANCO -->
+                <div class="contract-card hidden" id="contractResult">
+                  <div class="contract-badge"><i class="fa-solid fa-circle-check"></i> Contrato Ativo em Vigência</div>
+                  <div class="contract-details">
+                    <div class="detail-item">
+                      <span class="detail-label">Empresa:</span>
+                      <span class="detail-value" id="resEmpresa">-</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Função:</span>
+                      <span class="detail-value" id="resFuncao">-</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Carga Horária:</span>
+                      <span class="detail-value" id="resCarga">-</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Tempo Restante:</span>
+                      <span class="detail-value highlight" id="resTempo">-</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="status-msg alert-box hidden" id="msgContratoErro"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. SOLICITAR DECLARAÇÃO DE MATRÍCULA -->
+          <div class="accordion-item">
+            <button class="accordion-header" data-target="panelDeclaracao">
+              <span><i class="fa-solid fa-file-invoice"></i> Solicitar Declaração de Matrícula</span>
+              <i class="fa-solid fa-chevron-down accordion-arrow"></i>
+            </button>
+            <div class="accordion-panel" id="panelDeclaracao">
+              <div class="panel-content">
+                <div class="form-grid">
+                  <input type="text" id="nomeDeclaracaoInput" value="{{ username }}" placeholder="Seu Nome Completo..." class="modal-input">
+                  <input type="text" id="cgmInput" value="{{ cgm }}" placeholder="Número do seu CGM..." class="modal-input">
+                </div>
+                <div class="panel-action">
+                  <button class="btn-confirm" id="btnSolicitarDeclaracao">Solicitar Declaração</button>
+                </div>
+                <div class="status-msg info-msg hidden" id="msgDeclaracao">
+                  <i class="fa-solid fa-circle-info"></i> Sua solicitação foi enviada! Aguarde a declaração chegar na sua caixa de mensagens do site.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- PÁGINA PRINCIPAL -->
+  <div class="page-wrapper">
+    
+    <header class="top-header">
+      <div class="header-left">
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fa-solid fa-bars"></i>
+          <span>Menu</span>
+        </button>
+        <h1 class="logo-title">
+          <i class="fa-solid fa-map-location-dot"></i>
+          <span>CEEP <strong>Mapa</strong></span>
+        </h1>
+      </div>
+
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="searchInput" placeholder="Pesquisar bloco, secretaria, bebedouro...">
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="map-card">
+        <div class="card-header">
+          <h2><i class="fa-solid fa-compass"></i> Navegação Geral do Campus</h2>
+          <p class="subtitle">Selecione os filtros abaixo para exibir ou ocultar pontos de interesse no mapa.</p>
+        </div>
+
+        <div class="filter-panel">
+          <button class="filter-toggle-btn" id="filterToggleBtn">
+            <i class="fa-solid fa-sliders"></i>
+            <span>Filtros do Mapa</span>
+            <i class="fa-solid fa-chevron-down arrow-icon" id="filterArrow"></i>
+          </button>
+
+          <div class="filter-dropdown" id="filterDropdown">
+            <div class="filter-options">
+              
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="secretaria" checked>
+                <span class="custom-check check-secretaria"><i class="fa-solid fa-building-columns"></i></span>
+                <span>Secretaria / Atendimento</span>
+              </label>
+
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="biblioteca" checked>
+                <span class="custom-check check-bilioteca"><i class="fa-solid fa-book-open"></i></span>
+                <span>Biblioteca</span>
+              </label>
+
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="bebedouro" checked>
+                <span class="custom-check check-bebedouro"><i class="fa-solid fa-droplet"></i></span>
+                <span>Bebedouros</span>
+              </label>
+
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="geral" checked>
+                <span class="custom-check check-geral"><i class="fa-solid fa-location-dot"></i></span>
+                <span>Locais Gerais / Quadras</span>
+              </label>
+
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="banheiro" checked>
+                <span class="custom-check check-banheiro"><i class="fa-solid fa-restroom"></i></span>
+                <span>Banheiros (Em breve)</span>
+              </label>
+
+              <label class="filter-item">
+                <input type="checkbox" class="category-checkbox" value="lanche" checked>
+                <span class="custom-check check-lanche"><i class="fa-solid fa-utensils"></i></span>
+                <span>Pontos de Lanche (Em breve)</span>
+              </label>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="map-wrapper">
+          <div class="map-container" id="mapContainer">
+            <img src="{{ url_for('static', filename='mapa.jpg') }}" alt="Mapa do CEEP" id="mapaImg">
+
+            <div class="map-marker clickable-marker" data-category="secretaria" id="secretariaMarker" style="top: 76%; left: 52%;">
+              <span class="marker-icon secretaria-icon">
+                <i class="fa-solid fa-building-columns"></i>
+              </span>
+              <div class="marker-tooltip">Secretaria do CEEP (Clique para ver)</div>
+            </div>
+
+            <div class="map-marker" data-category="geral" style="top: 36%; left: 34%;">
+              <span class="marker-dot red-dot"></span>
+              <div class="marker-tooltip">Quadra Coberta</div>
+            </div>
+
+            <div class="map-marker" data-category="geral" style="top: 22%; left: 78%;">
+              <span class="marker-dot red-dot"></span>
+              <div class="marker-tooltip">Campo de Futebol</div>
+            </div>
+
+            <label for="modal-biblio-toggle" class="map-marker clickable-marker" data-category="biblioteca" style="top: 55%; left: 48%;">
+              <span class="marker-icon biblioteca-icon">
+                <i class="fa-solid fa-book-open"></i>
+              </span>
+              <span class="marker-tooltip">Biblioteca do CEEP (Clique para ver)</span>
+            </label>
+
+            <div class="map-marker" data-category="geral" style="top: 82%; left: 42%;">
+              <span class="marker-dot red-dot"></span>
+              <div class="marker-tooltip">Blocos Didáticos / Entrada</div>
+            </div>
+
+            <div class="map-marker" data-category="geral" style="top: 80%; left: 74%;">
+              <span class="marker-dot red-dot"></span>
+              <div class="marker-tooltip">Quadra Externa</div>
+            </div>
+
+            <div class="map-marker" data-category="bebedouro" style="top: 48%; left: 38%;">
+              <span class="marker-icon water-drop">
+                <i class="fa-solid fa-droplet"></i>
+              </span>
+              <div class="marker-tooltip">Bebedouro - Bloco Didático</div>
+            </div>
+
+            <div class="map-marker" data-category="bebedouro" style="top: 32%; left: 45%;">
+              <span class="marker-icon water-drop">
+                <i class="fa-solid fa-droplet"></i>
+              </span>
+              <div class="marker-tooltip">Bebedouro - Quadra Coberta</div>
+            </div>
+
+            <div class="map-marker" data-category="bebedouro" style="top: 72%; left: 68%;">
+              <span class="marker-icon water-drop">
+                <i class="fa-solid fa-droplet"></i>
+              </span>
+              <div class="marker-tooltip">Bebedouro - Área de Convivência</div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <p>&copy; 2026 CEEP - Mapa Interativo do Campus. Todos os direitos reservados.</p>
+    </footer>
+
+  </div>
+
+  <!-- SCRIPTS INTEGRADOS COM O FLASK -->
+  <script>
+    let currentCGM = "{{ cgm }}";
+    let currentNome = "{{ username }}";
+
+    // Controle da Barra Lateral
+    const menuToggle = document.getElementById('menuToggle');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+    function openMenu() {
+      sidebar.classList.remove('collapsed');
+      sidebarOverlay.classList.add('active');
+    }
+
+    function closeMenu() {
+      sidebar.classList.add('collapsed');
+      sidebarOverlay.classList.remove('active');
+    }
+
+    menuToggle.addEventListener('click', () => {
+      if (sidebar.classList.contains('collapsed')) openMenu();
+      else closeMenu();
+    });
+
+    closeSidebar.addEventListener('click', closeMenu);
+    sidebarOverlay.addEventListener('click', closeMenu);
+
+    // Controle de Filtros
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterDropdown = document.getElementById('filterDropdown');
+    const filterArrow = document.getElementById('filterArrow');
+
+    filterToggleBtn.addEventListener('click', () => {
+      filterDropdown.classList.toggle('open');
+      filterArrow.classList.toggle('rotate');
+    });
+
+    const checkboxes = document.querySelectorAll('.category-checkbox');
+    const markers = document.querySelectorAll('.map-marker');
+
+    function updateMarkersVisibility() {
+      const activeCategories = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+      markers.forEach(marker => {
+        const category = marker.getAttribute('data-category');
+        if (activeCategories.includes(category)) {
+          marker.style.display = 'block';
+        } else {
+          marker.style.display = 'none';
+        }
+      });
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener('change', updateMarkersVisibility));
+
+    // Pesquisa Dinâmica de Marcadores no Mapa
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      markers.forEach(marker => {
+        const tooltipText = marker.querySelector('.marker-tooltip').textContent.toLowerCase();
+        if (tooltipText.includes(query)) {
+          marker.style.display = 'block';
+        } else {
+          marker.style.display = 'none';
+        }
+      });
+    });
+
+    // Controle do Modal da Secretaria
+    const secretariaMarker = document.getElementById('secretariaMarker');
+    const secretariaModal = document.getElementById('secretariaModal');
+    const closeSecretariaModal = document.getElementById('closeSecretariaModal');
+
+    function openModal() { secretariaModal.classList.add('active'); }
+    function closeModal() { secretariaModal.classList.remove('active'); }
+
+    secretariaMarker.addEventListener('click', openModal);
+    closeSecretariaModal.addEventListener('click', closeModal);
+    secretariaModal.addEventListener('click', (e) => {
+      if (e.target === secretariaModal) closeModal();
+    });
+
+    // Controle do Carrossel de Fotos
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.getElementById('prevSlide');
+    const nextBtn = document.getElementById('nextSlide');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+      if (index >= slides.length) currentSlide = 0;
+      else if (index < 0) currentSlide = slides.length - 1;
+      else currentSlide = index;
+
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === currentSlide));
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === currentSlide));
+    }
+
+    nextBtn.addEventListener('click', () => showSlide(currentSlide + 1));
+    prevBtn.addEventListener('click', () => showSlide(currentSlide - 1));
+    dots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        showSlide(parseInt(e.target.getAttribute('data-index')));
+      });
+    });
+
+    // CONTROLE DOS ACCORDIONS
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    accordionHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const targetId = header.getAttribute('data-target');
+        const targetPanel = document.getElementById(targetId);
+        const isOpen = targetPanel.classList.contains('open');
+
+        document.querySelectorAll('.accordion-panel').forEach(panel => panel.classList.remove('open'));
+        document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
+
+        if (!isOpen) {
+          targetPanel.classList.add('open');
+          header.classList.add('active');
+        }
+      });
+    });
+
+    // Atualiza nome do arquivo PDF selecionado
+    const atestadoFile = document.getElementById('atestadoFile');
+    const fileNameText = document.getElementById('fileNameText');
+    if (atestadoFile) {
+      atestadoFile.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          fileNameText.textContent = e.target.files[0].name;
+        } else {
+          fileNameText.textContent = 'Clique aqui para selecionar o arquivo PDF';
+        }
+      });
+    }
+
+    // API 1: Protocolar Atestado
+    const btnEnviarAtestado = document.getElementById('btnEnviarAtestado');
+    const msgAtestado = document.getElementById('msgAtestado');
+    const msgAtestadoTexto = document.getElementById('msgAtestadoTexto');
+
+    btnEnviarAtestado.addEventListener('click', () => {
+      if (!atestadoFile.files.length) {
+        alert('Por favor, selecione um arquivo PDF primeiro.');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('file', atestadoFile.files[0]);
+      formData.append('cgm', currentCGM);
+
+      fetch('/api/protocolar-atestado', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.sucesso) {
+          msgAtestadoTexto.textContent = data.mensagem;
+          msgAtestado.classList.remove('hidden');
+        } else {
+          alert(data.mensagem);
+        }
+      })
+      .catch(() => alert('Erro ao enviar atestado. Tente novamente.'));
+    });
+
+    // API 2: Buscar Situação de Contrato
+    const btnBuscarContrato = document.getElementById('btnBuscarContrato');
+    const contractResult = document.getElementById('contractResult');
+    const msgContratoErro = document.getElementById('msgContratoErro');
+    const nomeContratoInput = document.getElementById('nomeContratoInput');
+
+    btnBuscarContrato.addEventListener('click', () => {
+      const nome = nomeContratoInput.value.trim();
+      if (!nome) {
+        alert('Por favor, digite seu nome completo para realizar a consulta.');
+        return;
+      }
+
+      fetch('/api/consultar-contrato', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nome })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.sucesso) {
+          document.getElementById('resEmpresa').textContent = data.empresa;
+          document.getElementById('resFuncao').textContent = data.funcao;
+          document.getElementById('resCarga').textContent = data.carga_horaria;
+          document.getElementById('resTempo').textContent = data.tempo_restante;
+          contractResult.classList.remove('hidden');
+          msgContratoErro.classList.add('hidden');
+        } else {
+          contractResult.classList.add('hidden');
+          msgContratoErro.textContent = data.mensagem;
+          msgContratoErro.classList.remove('hidden');
+        }
+      });
+    });
+
+    // API 3: Solicitar Declaração de Matrícula
+    const btnSolicitarDeclaracao = document.getElementById('btnSolicitarDeclaracao');
+    const msgDeclaracao = document.getElementById('msgDeclaracao');
+    const nomeDeclaracaoInput = document.getElementById('nomeDeclaracaoInput');
+    const cgmInput = document.getElementById('cgmInput');
+
+    btnSolicitarDeclaracao.addEventListener('click', () => {
+      const nome = nomeDeclaracaoInput.value.trim();
+      const cgm = cgmInput.value.trim();
+
+      if (!nome || !cgm) {
+        alert('Por favor, preencha o Nome Completo e o número do CGM.');
+        return;
+      }
+
+      fetch('/api/solicitar-declaracao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome: nome, cgm: cgm })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.sucesso) {
+          msgDeclaracao.classList.remove('hidden');
+        } else {
+          alert(data.mensagem);
+        }
+      });
+    });
+
+    // API 4: Trocar de Usuário (Alterna entre João Silva e Maria Souza)
+    const btnTrocarUsuario = document.getElementById('btnTrocarUsuario');
+    btnTrocarUsuario.addEventListener('click', (e) => {
+      e.preventDefault();
+      const novoCGM = (currentCGM === '12345678') ? '87654321' : '12345678';
+      fetch(`/api/trocar-aluno/${novoCGM}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.sucesso) {
+            currentCGM = data.cgm;
+            currentNome = data.nome_completo;
+            document.getElementById('userDisplayName').textContent = currentNome;
+            document.getElementById('userDisplayCGM').textContent = `CGM: ${currentCGM}`;
+            nomeContratoInput.value = currentNome;
+            nomeDeclaracaoInput.value = currentNome;
+            cgmInput.value = currentCGM;
+            alert(`Usuário alterado para: ${currentNome} (CGM: ${currentCGM})`);
+            closeMenu();
+          }
+        });
+    });
+
+    // API 5: Caixa de Mensagens
+    const btnAbrirMensagens = document.getElementById('btnAbrirMensagens');
+    const mensagensModal = document.getElementById('mensagensModal');
+    const closeMensagensModal = document.getElementById('closeMensagensModal');
+    const listaMensagensContainer = document.getElementById('listaMensagensContainer');
+
+    function carregarMensagens() {
+      listaMensagensContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px;">Carregando mensagens...</p>';
+      fetch(`/api/mensagens/${currentCGM}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.sucesso && data.mensagens.length > 0) {
+            listaMensagensContainer.innerHTML = '';
+            data.mensagens.forEach(msg => {
+              const msgCard = document.createElement('div');
+              msgCard.className = 'message-card';
+              msgCard.innerHTML = `
+                <div class="message-header">
+                  <strong>${msg.titulo}</strong>
+                  <span class="message-date">${msg.data}</span>
+                </div>
+                <div class="message-content">${msg.conteudo}</div>
+                ${msg.anexo_path ? `<a href="/download-doc/${msg.anexo_path}" class="message-attachment" target="_blank"><i class="fa-solid fa-paperclip"></i> Baixar Anexo: ${msg.anexo_nome}</a>` : ''}
+              `;
+              listaMensagensContainer.appendChild(msgCard);
+            });
+          } else {
+            listaMensagensContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px;">Nenhuma mensagem encontrada para este usuário.</p>';
+          }
+        });
+    }
+
+    btnAbrirMensagens.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeMenu();
+      carregarMensagens();
+      mensagensModal.classList.add('active');
+    });
+
+    closeMensagensModal.addEventListener('click', () => mensagensModal.classList.remove('active'));
+    mensagensModal.addEventListener('click', (e) => {
+      if (e.target === mensagensModal) mensagensModal.classList.remove('active');
+    });
+  </script>
+<!-- Checkbox invisível para controlar a abertura/fechamento da Modal sem JavaScript -->
+<input type="checkbox" id="modal-biblio-toggle" hidden>
+
+<!-- ESTRUTURA DA MODAL DA BIBLIOTECA -->
+<div class="modal-overlay pure-css-modal">
+  <div class="modal-card">
+    <!-- Botão de Fechar (desmarca o checkbox) -->
+    <label for="modal-biblio-toggle" class="close-modal-btn" title="Fechar">
+      <i class="fa-solid fa-xmark"></i>
+    </label>
+    
+    <!-- CARROSSEL DE FOTOS EM CSS PURO -->
+    <div class="pure-carousel">
+      <!-- Radios para trocar de foto -->
+      <input type="radio" name="biblio-slide" id="biblio-slide1" checked hidden>
+      <input type="radio" name="biblio-slide" id="biblio-slide2" hidden>
+      <input type="radio" name="biblio-slide" id="biblio-slide3" hidden>
+
+      <!-- Espaço das Fotos -->
+      <div class="carousel-slides">
+        <div class="carousel-slide slide-1">
+          <!-- Caso tenha foto real, substitua o bloco abaixo por: <img src="{{ url_for('static', filename='img/biblio1.jpg') }}" class="carousel-img"> -->
+          <div class="photo-placeholder">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Foto 1 da Biblioteca</span>
+          </div>
+        </div>
+
+        <div class="carousel-slide slide-2">
+          <div class="photo-placeholder">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Foto 2 da Biblioteca</span>
+          </div>
+        </div>
+
+        <div class="carousel-slide slide-3">
+          <div class="photo-placeholder">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Foto 3 da Biblioteca</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setas Esquerda / Direita para navegar pelas fotos -->
+      <div class="carousel-controls control-1">
+        <label for="biblio-slide3" class="carousel-btn prev"><i class="fa-solid fa-chevron-left"></i></label>
+        <label for="biblio-slide2" class="carousel-btn next"><i class="fa-solid fa-chevron-right"></i></label>
+      </div>
+
+      <div class="carousel-controls control-2">
+        <label for="biblio-slide1" class="carousel-btn prev"><i class="fa-solid fa-chevron-left"></i></label>
+        <label for="biblio-slide3" class="carousel-btn next"><i class="fa-solid fa-chevron-right"></i></label>
+      </div>
+
+      <div class="carousel-controls control-3">
+        <label for="biblio-slide2" class="carousel-btn prev"><i class="fa-solid fa-chevron-left"></i></label>
+        <label for="biblio-slide1" class="carousel-btn next"><i class="fa-solid fa-chevron-right"></i></label>
+      </div>
+
+      <!-- Bolinhas Indicadoras da Foto Atual -->
+      <div class="carousel-dots">
+        <label for="biblio-slide1" class="dot dot-1"></label>
+        <label for="biblio-slide2" class="dot dot-2"></label>
+        <label for="biblio-slide3" class="dot dot-3"></label>
+      </div>
+    </div>
+
+    <!-- TEXTO DESCRITIVO -->
+    <div class="modal-body">
+      <h2 class="modal-title">Biblioteca do CEEP</h2>
+      <p class="modal-description">
+        Aqui, a biblioteca do CEEP, local aonde os membros da comunidade escolar podem se reunir para: estudar, ler, usar os computadores, trabalhar em projetos etc. Aqui, existem uma vasta gama de livros e demais arquivos voltados para apoiar o aprendizado de alunos e professores.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+  </div>
+</div>
+</html>
